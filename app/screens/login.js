@@ -4,6 +4,7 @@ import {
   TextInput,
   Button,
   Text,
+  Alert,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -42,25 +43,39 @@ class Login extends Component {
       email: this.state.email,
       password: this.state.password,
     }).then((response) => {
-      console.log(response);
       if (response.message && response.code.toString().startsWith('4')) {
         this.setState({
           error: 'Credenciais inválidas',
         });
+      } else if (response.data.length) {
+        this.props.navigation.navigate('App');
       }
     }).catch((error) => {
       console.log(error);
     });
   }
 
-  graphCallback(error, result) {
+  graphCallback(error, user) {
     if (error) {
       this.setState({ error });
     } else {
       AccessToken.getCurrentAccessToken().then((token) => {
-        console.log(result);
         this.props.auth(token.accessToken).then((response) => {
-          console.log(response);
+          if (response.accessToken) {
+            const credentials = {
+              email: user.email,
+              name: user.name,
+              picture: `/${user.id}/picture?type=square`,
+              facebookId: user.id,
+            };
+            this.props.fetchFBUser(credentials).then((result) => {
+              if (result.data.length) {
+                this.props.navigation.navigate('App');
+              } else {
+                Alert.alert('Erro', 'Não foi possivel fazer login com esse email.');
+              }
+            });
+          }
         });
       }, e => this.setState({ error: e.toString() }));
     }

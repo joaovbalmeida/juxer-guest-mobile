@@ -100064,12 +100064,12 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           email: this.state.email,
           password: this.state.password
         }).then(function (response) {
-          console.log(response);
-
           if (response.message && response.code.toString().startsWith('4')) {
             _this2.setState({
               error: 'Credenciais inválidas'
             });
+          } else if (response.data.length) {
+            _this2.props.navigation.navigate('App');
           }
         }).catch(function (error) {
           console.log(error);
@@ -100077,7 +100077,7 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
       }
     }, {
       key: "graphCallback",
-      value: function graphCallback(error, result) {
+      value: function graphCallback(error, user) {
         var _this3 = this;
 
         if (error) {
@@ -100086,10 +100086,23 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           });
         } else {
           _reactNativeFbsdk.AccessToken.getCurrentAccessToken().then(function (token) {
-            console.log(result);
-
             _this3.props.auth(token.accessToken).then(function (response) {
-              console.log(response);
+              if (response.accessToken) {
+                var credentials = {
+                  email: user.email,
+                  name: user.name,
+                  picture: "/" + user.id + "/picture?type=square",
+                  facebookId: user.id
+                };
+
+                _this3.props.fetchFBUser(credentials).then(function (result) {
+                  if (result.data.length) {
+                    _this3.props.navigation.navigate('App');
+                  } else {
+                    _reactNative.Alert.alert('Erro', 'Não foi possivel fazer login com esse email.');
+                  }
+                });
+              }
             });
           }, function (e) {
             return _this3.setState({
@@ -100136,12 +100149,12 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
         return _react.default.createElement(_reactNative.View, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 94
+            lineNumber: 109
           }
         }, _react.default.createElement(_reactNative.Text, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 95
+            lineNumber: 110
           }
         }, this.state.error), _react.default.createElement(_reactNative.TextInput, {
           style: {
@@ -100157,7 +100170,7 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           value: this.state.email,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 98
+            lineNumber: 113
           }
         }), _react.default.createElement(_reactNative.TextInput, {
           style: {
@@ -100173,14 +100186,14 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           value: this.state.password,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 103
+            lineNumber: 118
           }
         }), _react.default.createElement(_reactNative.Button, {
           title: "Login",
           onPress: this.handleLogin,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 108
+            lineNumber: 123
           }
         }), _react.default.createElement(_reactNative.Button, {
           title: "Register",
@@ -100189,14 +100202,14 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 112
+            lineNumber: 127
           }
         }), _react.default.createElement(_reactNative.Button, {
           title: "FacebookLogin",
           onPress: this.handleFBLogin,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 116
+            lineNumber: 131
           }
         }));
       }
@@ -101309,30 +101322,23 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
     };
   };
 
-  var fetchUser = function fetchUser(email) {
-    return function (dispatch) {
-      dispatch(requestUser());
-      return _api.default.users.find({
-        email: email
-      }).then(function (response) {
-        dispatch(receiveUser(response.data[0]));
-        return response;
-      }, function (error) {
-        dispatch(receiveUser({}));
-        return error;
-      });
-    };
-  };
-
   var login = function login(credentials) {
     return function (dispatch) {
       dispatch(requestToken());
       return _api.default.auth(_objectSpread({
         strategy: 'local'
       }, credentials)).then(function (response) {
-        return fetchUser(credentials)(dispatch).then(function () {
-          dispatch(receiveToken(response.accessToken, true));
+        dispatch(receiveToken(response.accessToken, true));
+        dispatch(requestUser());
+        return _api.default.users.find({
+          query: {
+            email: credentials.email
+          }
+        }).then(function (result) {
+          dispatch(receiveUser(result.data[0]));
+          return result;
         }, function (error) {
+          dispatch(receiveToken('', false));
           return error;
         });
       }, function (error) {
@@ -108447,6 +108453,7 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Register).call(this, props));
       _this.state = {
         email: '',
+        name: '',
         password: '',
         error: ''
       };
@@ -108464,6 +108471,7 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
         });
         this.props.createUser({
           email: this.state.email,
+          name: this.state.name,
           password: this.state.password
         }).then(function (response) {
           if (response.message && response.code.toString().startsWith('4')) {
@@ -108479,6 +108487,8 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
                 _this2.setState({
                   error: 'Não foi possivel fazer login'
                 });
+              } else if (result.data.length) {
+                _this2.props.navigation.navigate('App');
               }
             });
           }
@@ -108492,12 +108502,12 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
         return _react.default.createElement(_reactNative.View, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 54
+            lineNumber: 58
           }
         }, _react.default.createElement(_reactNative.Text, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 55
+            lineNumber: 59
           }
         }, this.state.error), _react.default.createElement(_reactNative.TextInput, {
           style: {
@@ -108513,7 +108523,23 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           value: this.state.email,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 58
+            lineNumber: 62
+          }
+        }), _react.default.createElement(_reactNative.TextInput, {
+          style: {
+            height: 40,
+            borderColor: 'gray',
+            borderWidth: 1
+          },
+          onChangeText: function onChangeText(name) {
+            return _this3.setState({
+              name: name
+            });
+          },
+          value: this.state.name,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 67
           }
         }), _react.default.createElement(_reactNative.TextInput, {
           style: {
@@ -108529,14 +108555,14 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
           value: this.state.password,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 63
+            lineNumber: 72
           }
         }), _react.default.createElement(_reactNative.Button, {
           title: "Register",
           onPress: this.handleRegister,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 68
+            lineNumber: 77
           }
         }));
       }
@@ -108551,7 +108577,10 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
   exports.Register = Register = _wrapComponent("Register")(Register);
   Register.propTypes = {
     createUser: _propTypes.default.func.isRequired,
-    login: _propTypes.default.func.isRequired
+    login: _propTypes.default.func.isRequired,
+    navigation: _propTypes.default.shape({
+      navigate: _propTypes.default.func.isRequired
+    }).isRequired
   };
   var RegisterConnector = (0, _reactRedux.connect)(function () {
     return {};
@@ -108590,7 +108619,7 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
   });
   var _default = AppStack;
   exports.default = _default;
-},753,[544,754,764],"app/routes/app.js");
+},753,[544,754,756],"app/routes/app.js");
 __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -108803,6 +108832,143 @@ __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
   var _default2 = RegisterConnector;
   exports.default = _default2;
 },755,[37,87,1,508,58,682],"app/screens/queue.js");
+__d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = void 0;
+
+  var _react = _interopRequireWildcard(_$$_REQUIRE(_dependencyMap[0], "react"));
+
+  var _index = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1], "./../../node_modules/react-transform-hmr/lib/index.js"));
+
+  var _reactNative = _$$_REQUIRE(_dependencyMap[2], "react-native");
+
+  var _reactRedux = _$$_REQUIRE(_dependencyMap[3], "react-redux");
+
+  var _propTypes = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[4], "prop-types"));
+
+  var _actions = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[5], "../store/actions"));
+
+  var _jsxFileName = "/Users/joaovbalmeida/Documents/reactnative/juxerguest/app/screens/checkin.js";
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } _setPrototypeOf(subClass.prototype, superClass && superClass.prototype); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+  function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  function _possibleConstructorReturn(self, call) { if (call && (typeof call === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+  function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+  function _getPrototypeOf(o) { _getPrototypeOf = Object.getPrototypeOf || function _getPrototypeOf(o) { return o.__proto__; }; return _getPrototypeOf(o); }
+
+  var _components = {
+    Settings: {
+      displayName: "Settings"
+    }
+  };
+
+  var _node_modulesReactTransformHmrLibIndexJs2 = (0, _index.default)({
+    filename: "/Users/joaovbalmeida/Documents/reactnative/juxerguest/app/screens/checkin.js",
+    components: _components,
+    locals: [module],
+    imports: [_react.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _node_modulesReactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var logoutAction = _actions.default.logout;
+
+  var Settings = function (_Component) {
+    function Settings(props) {
+      var _this;
+
+      _classCallCheck(this, Settings);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Settings).call(this, props));
+      _this.state = {};
+      return _this;
+    }
+
+    _createClass(Settings, [{
+      key: "render",
+      value: function render() {
+        var _this2 = this;
+
+        return _react.default.createElement(_reactNative.View, {
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 21
+          }
+        }, _react.default.createElement(_reactNative.Text, {
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 22
+          }
+        }, "this.props.user.name"), _react.default.createElement(_reactNative.Button, {
+          title: "Mudar para " + (this.props.route === 'Host' ? 'Convidado' : 'Jukebox'),
+          onPress: function onPress() {
+            _this2.props.navigation.navigate('Auth');
+          },
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 23
+          }
+        }), _react.default.createElement(_reactNative.Button, {
+          title: "Logout",
+          onPress: function onPress() {
+            _this2.props.logout();
+
+            _this2.props.navigation.navigate('Auth');
+          },
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 29
+          }
+        }));
+      }
+    }]);
+
+    _inherits(Settings, _Component);
+
+    return Settings;
+  }(_react.Component);
+
+  Settings = _wrapComponent("Settings")(Settings);
+  Settings.propTypes = {
+    logout: _propTypes.default.func.isRequired,
+    navigation: _propTypes.default.shape({
+      navigate: _propTypes.default.func.isRequired
+    }).isRequired
+  };
+  var SettingsConnector = (0, _reactRedux.connect)(function (state) {
+    return {
+      user: state.auth.user.data
+    };
+  }, function (dispatch) {
+    return {
+      logout: function logout() {
+        return dispatch(logoutAction());
+      }
+    };
+  })(Settings);
+  var _default2 = SettingsConnector;
+  exports.default = _default2;
+},756,[37,87,1,508,58,682],"app/screens/checkin.js");
 __d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -109112,143 +109278,6 @@ __d(function(global, require, module, exports) {
   "displayName": "juxerguest"
 };
 },763,[],"app.json");
-__d(function (global, _$$_REQUIRE, module, exports, _dependencyMap) {
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.default = void 0;
-
-  var _react = _interopRequireWildcard(_$$_REQUIRE(_dependencyMap[0], "react"));
-
-  var _index = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1], "./../../node_modules/react-transform-hmr/lib/index.js"));
-
-  var _reactNative = _$$_REQUIRE(_dependencyMap[2], "react-native");
-
-  var _reactRedux = _$$_REQUIRE(_dependencyMap[3], "react-redux");
-
-  var _propTypes = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[4], "prop-types"));
-
-  var _actions = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[5], "../store/actions"));
-
-  var _jsxFileName = "/Users/joaovbalmeida/Documents/reactnative/juxerguest/app/screens/checkin.js";
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } _setPrototypeOf(subClass.prototype, superClass && superClass.prototype); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-  function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-  function _possibleConstructorReturn(self, call) { if (call && (typeof call === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-  function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-  function _getPrototypeOf(o) { _getPrototypeOf = Object.getPrototypeOf || function _getPrototypeOf(o) { return o.__proto__; }; return _getPrototypeOf(o); }
-
-  var _components = {
-    Settings: {
-      displayName: "Settings"
-    }
-  };
-
-  var _node_modulesReactTransformHmrLibIndexJs2 = (0, _index.default)({
-    filename: "/Users/joaovbalmeida/Documents/reactnative/juxerguest/app/screens/checkin.js",
-    components: _components,
-    locals: [module],
-    imports: [_react.default]
-  });
-
-  function _wrapComponent(id) {
-    return function (Component) {
-      return _node_modulesReactTransformHmrLibIndexJs2(Component, id);
-    };
-  }
-
-  var logoutAction = _actions.default.logout;
-
-  var Settings = function (_Component) {
-    function Settings(props) {
-      var _this;
-
-      _classCallCheck(this, Settings);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Settings).call(this, props));
-      _this.state = {};
-      return _this;
-    }
-
-    _createClass(Settings, [{
-      key: "render",
-      value: function render() {
-        var _this2 = this;
-
-        return _react.default.createElement(_reactNative.View, {
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 21
-          }
-        }, _react.default.createElement(_reactNative.Text, {
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 22
-          }
-        }, "this.props.user.name"), _react.default.createElement(_reactNative.Button, {
-          title: "Mudar para " + (this.props.route === 'Host' ? 'Convidado' : 'Jukebox'),
-          onPress: function onPress() {
-            _this2.props.navigation.navigate('Auth');
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 23
-          }
-        }), _react.default.createElement(_reactNative.Button, {
-          title: "Logout",
-          onPress: function onPress() {
-            _this2.props.logout();
-
-            _this2.props.navigation.navigate('Auth');
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 29
-          }
-        }));
-      }
-    }]);
-
-    _inherits(Settings, _Component);
-
-    return Settings;
-  }(_react.Component);
-
-  Settings = _wrapComponent("Settings")(Settings);
-  Settings.propTypes = {
-    logout: _propTypes.default.func.isRequired,
-    navigation: _propTypes.default.shape({
-      navigate: _propTypes.default.func.isRequired
-    }).isRequired
-  };
-  var SettingsConnector = (0, _reactRedux.connect)(function (state) {
-    return {
-      user: state.auth.user.data
-    };
-  }, function (dispatch) {
-    return {
-      logout: function logout() {
-        return dispatch(logoutAction());
-      }
-    };
-  })(Settings);
-  var _default2 = SettingsConnector;
-  exports.default = _default2;
-},764,[37,87,1,508,58,682],"app/screens/checkin.js");
 require(263);
 require(0);
 //# sourceMappingURL=index.map

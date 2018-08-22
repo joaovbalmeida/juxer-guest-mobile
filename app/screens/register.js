@@ -15,6 +15,7 @@ export class Register extends Component {
     super(props);
     this.state = {
       email: '',
+      name: '',
       password: '',
       error: '',
     };
@@ -28,6 +29,7 @@ export class Register extends Component {
     });
     this.props.createUser({
       email: this.state.email,
+      name: this.state.name,
       password: this.state.password,
     }).then((response) => {
       if (response.message && response.code.toString().startsWith('4')) {
@@ -43,6 +45,8 @@ export class Register extends Component {
             this.setState({
               error: 'Não foi possivel fazer login',
             });
+          } else if (result.data.length) {
+            this.props.navigation.navigate('App');
           }
         });
       }
@@ -62,6 +66,11 @@ export class Register extends Component {
         />
         <TextInput
           style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+          onChangeText={name => this.setState({ name })}
+          value={this.state.name}
+        />
+        <TextInput
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
           onChangeText={password => this.setState({ password })}
           value={this.state.password}
         />
@@ -77,6 +86,9 @@ export class Register extends Component {
 Register.propTypes = {
   createUser: PropTypes.func.isRequired,
   login: PropTypes.func.isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 const RegisterConnector = connect(() => (

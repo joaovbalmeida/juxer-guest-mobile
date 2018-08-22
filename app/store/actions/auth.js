@@ -33,21 +33,6 @@ const resetUser = () => (
   }
 );
 
-const fetchUser = email => (
-  (dispatch) => {
-    dispatch(requestUser());
-
-    return api.users.find({ email })
-      .then((response) => {
-        dispatch(receiveUser(response.data[0]));
-        return response;
-      }, (error) => {
-        dispatch(receiveUser({}));
-        return error;
-      });
-  }
-);
-
 const login = credentials => (
   (dispatch) => {
     dispatch(requestToken());
@@ -55,9 +40,17 @@ const login = credentials => (
     return api.auth({
       strategy: 'local',
       ...credentials,
-    }).then(response => fetchUser(credentials)(dispatch).then(() => {
+    }).then((response) => {
       dispatch(receiveToken(response.accessToken, true));
-    }, error => error), (error) => {
+      dispatch(requestUser());
+      return api.users.find({ query: { email: credentials.email } }).then((result) => {
+        dispatch(receiveUser(result.data[0]));
+        return result;
+      }, (error) => {
+        dispatch(receiveToken('', false));
+        return error;
+      });
+    }, (error) => {
       dispatch(receiveToken('', false));
       return error;
     });
