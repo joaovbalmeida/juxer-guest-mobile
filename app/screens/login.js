@@ -14,7 +14,7 @@ import {
   GraphRequestManager,
 } from 'react-native-fbsdk';
 
-import actions from '../store/actions';
+import actions from '../store/actions/index';
 
 const {
   auth: authAction,
@@ -31,6 +31,7 @@ class Login extends Component {
       error: '',
     };
 
+    this.graphCallback = this.graphCallback.bind(this);
     this.handleFBLogin = this.handleFBLogin.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
   }
@@ -57,8 +58,11 @@ class Login extends Component {
       this.setState({ error });
     } else {
       AccessToken.getCurrentAccessToken().then((token) => {
-        console.log(token, result);
-      }, e => this.setState({ error: e }));
+        console.log(result);
+        this.props.auth(token.accessToken).then((response) => {
+          console.log(response);
+        });
+      }, e => this.setState({ error: e.toString() }));
     }
   }
 

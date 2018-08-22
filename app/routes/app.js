@@ -1,13 +1,13 @@
 import { createSwitchNavigator } from 'react-navigation';
 
 import EventStack from './event';
-import HomeScreen from '../screens/home';
+import CheckinScreen from '../screens/checkin';
 
 const AppStack = createSwitchNavigator({
-  Home: HomeScreen,
+  Checkin: CheckinScreen,
   Event: EventStack,
 }, {
-  initialRouteName: 'Home',
+  initialRouteName: 'Checkin',
 });
 
 export default AppStack;
