@@ -33,7 +33,38 @@ const resetUser = () => (
   }
 );
 
-const fetchUser = credentials => (
+const fetchUser = email => (
+  (dispatch) => {
+    dispatch(requestUser());
+
+    return api.users.find({ email })
+      .then((response) => {
+        dispatch(receiveUser(response.data[0]));
+        return response;
+      }, (error) => {
+        dispatch(receiveUser({}));
+        return error;
+      });
+  }
+);
+
+const login = credentials => (
+  (dispatch) => {
+    dispatch(requestToken());
+
+    return api.auth({
+      strategy: 'local',
+      ...credentials,
+    }).then(response => fetchUser(credentials)(dispatch).then(() => {
+      dispatch(receiveToken(response.accessToken, true));
+    }, error => error), (error) => {
+      dispatch(receiveToken('', false));
+      return error;
+    });
+  }
+);
+
+const fetchFBUser = credentials => (
   (dispatch) => {
     dispatch(requestUser());
 
@@ -60,6 +91,36 @@ const fetchUser = credentials => (
   }
 );
 
+const auth = token => (
+  (dispatch) => {
+    dispatch(requestToken());
+
+    return api.auth({
+      strategy: 'facebook',
+      accessToken: token,
+    }).then(() => api.auth())
+      .catch((error) => {
+        dispatch(receiveToken('', false));
+        return error;
+      });
+  }
+);
+
+const createUser = credentials => (
+  (dispatch) => {
+    dispatch(requestUser());
+
+    return api.users.create({ ...credentials })
+      .then((response) => {
+        dispatch(receiveUser(response));
+        return response;
+      }, (error) => {
+        dispatch(receiveUser({}));
+        return error;
+      });
+  }
+);
+
 const checkToken = () => (
   (dispatch) => {
     dispatch(requestToken());
@@ -71,21 +132,6 @@ const checkToken = () => (
       dispatch(receiveToken('', false));
       return error;
     });
-  }
-);
-
-const auth = token => (
-  (dispatch) => {
-    dispatch(requestToken());
-
-    return api.auth({
-      strategy: 'spotify',
-      accessToken: token,
-    }).then(() => api.auth())
-      .catch((error) => {
-        dispatch(receiveToken('', false));
-        return error;
-      });
   }
 );
 
@@ -106,6 +152,8 @@ export default {
   requestToken,
   logout,
   auth,
-  fetchUser,
+  login,
+  createUser,
+  fetchFBUser,
   checkToken,
 };

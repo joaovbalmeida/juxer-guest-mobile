@@ -4,7 +4,6 @@ import {
   TextInput,
   Button,
   Text,
-  Alert,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -19,7 +18,8 @@ import actions from '../store/actions';
 
 const {
   auth: authAction,
-  fetchUser: fetchUserAction,
+  fetchFBUser: fetchFBUserAction,
+  login: loginAction,
 } = actions;
 
 class Login extends Component {
@@ -31,8 +31,8 @@ class Login extends Component {
       error: '',
     };
 
-    this.facebookLogin = this.facebookLogin.bind(this);
-    this.login = this.login.bind(this);
+    this.handleFBLogin = this.handleFBLogin.bind(this);
+    this.handleLogin = this.handleLogin.bind(this);
   }
 
   handleLogin() {
@@ -52,34 +52,19 @@ class Login extends Component {
     });
   }
 
-  handleFBLogin(token) {
-    this.setState({ error: '' });
-
-    this.props.fbLogin(token).then((response) => {
-      if (response.message && response.code !== (409 || 500)) {
-        console.log(response.message);
-        this.setState({ error: 'Credenciais inválidas' });
-      }
-    });
-  }
-
   graphCallback(error, result) {
     if (error) {
       this.setState({ error });
     } else {
       AccessToken.getCurrentAccessToken().then((token) => {
-        this.handlePassportLogin(
-          result.email,
-          result.name,
-          result.id,
-          `/${result.id}/picture?type=square`,
-          token.accessToken.toString(),
-        );
+        console.log(token, result);
       }, e => this.setState({ error: e }));
     }
   }
 
-  facebookLogin() {
+  handleFBLogin() {
+    this.setState({ error: '' });
+
     LoginManager.logInWithReadPermissions(['public_profile', 'email']).then((result) => {
       if (result.isCancelled) {
         this.setState({ error: 'Login cancelled' });
@@ -126,7 +111,7 @@ class Login extends Component {
         />
         <Button
           title="FacebookLogin"
-          onPress={this.facebookLogin}
+          onPress={this.handleFBLogin}
         />
       </View>
     );
@@ -135,9 +120,8 @@ class Login extends Component {
 
 Login.propTypes = {
   auth: PropTypes.func.isRequired,
-  sptAuth: PropTypes.func.isRequired,
-  fetchUser: PropTypes.func.isRequired,
-  fetchSptUser: PropTypes.func.isRequired,
+  login: PropTypes.func.isRequired,
+  fetchFBUser: PropTypes.func.isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
@@ -151,14 +135,11 @@ const LoginConnector = connect(() => (
     auth: token => (
       dispatch(authAction(token))
     ),
-    sptAuth: () => (
-      dispatch(sptAuthAction())
+    fetchFBUser: credentials => (
+      dispatch(fetchFBUserAction(credentials))
     ),
-    fetchUser: email => (
-      dispatch(fetchUserAction(email))
-    ),
-    fetchSptUser: () => (
-      dispatch(fetchSptUserAction())
+    login: credentials => (
+      dispatch(loginAction(credentials))
     ),
   }
 ))(Login);
