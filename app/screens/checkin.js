@@ -1,36 +1,48 @@
 import React, { Component } from 'react';
-import { View, Text, Button } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+} from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import actions from '../store/actions';
 
 const {
-  logout: logoutAction,
+  startEvent: startEventAction,
 } = actions;
 
-class Settings extends Component {
+class Checkin extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
+      secret: '',
     };
+  }
+
+  componentDidMount() {
+    if (this.props.event) {
+      this.props.navigation.navigate('Event');
+    }
   }
 
   render() {
     return (
       <View>
-        <Text>this.props.user.name</Text>
-        <Button
-          title={`Mudar para ${this.props.route === 'Host' ? 'Convidado' : 'Jukebox'}`}
-          onPress={() => {
-            this.props.navigation.navigate('Auth');
-          }}
+        <TextInput
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 ,marginTop: 10 }}
+          onChangeText={secret => this.setState({ secret })}
+          value={this.state.code}
         />
         <Button
-          title="Logout"
+          title="Conectar"
           onPress={() => {
-            this.props.logout();
-            this.props.navigation.navigate('Auth');
+            this.props.startEvent(this.state.secret).then(() => {
+              this.props.navigation.navigate('Event');
+            });
           }}
         />
       </View>
@@ -38,23 +50,24 @@ class Settings extends Component {
   }
 }
 
-Settings.propTypes = {
-  logout: PropTypes.func.isRequired,
+Checkin.propTypes = {
+  startEvent: PropTypes.func.isRequired,
+  event: PropTypes.shape({}).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
 
-const SettingsConnector = connect(state => (
+const CheckinConnector = connect(state => (
   {
-    user: state.auth.user.data,
+    event: state.event.event.data,
   }
 ), dispatch => (
   {
-    logout: () => (
-      dispatch(logoutAction())
+    startEvent: secret => (
+      dispatch(startEventAction(secret))
     ),
   }
-))(Settings);
+))(Checkin);
 
-export default SettingsConnector;
+export default CheckinConnector;

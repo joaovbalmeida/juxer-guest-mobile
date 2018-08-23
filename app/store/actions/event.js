@@ -26,24 +26,36 @@ const updateEventCallback = (data) => {
   store.dispatch(receiveEvent(data));
 };
 
-const startEvent = event => (
+const startEvent = secret => (
   (dispatch) => {
     dispatch(requestEvent());
 
-    return api.events
-      .patch(event, { $push: { guests: store.getState().auth.user._id } }) // eslint-disable-line
-      .then((response) => {
-        dispatch(receiveEvent(response));
+    const id = store.getState().auth.user.data._id; // eslint-disable-line
 
-        api.events.on('patched', updateEventCallback);
+    return api.events.find({ query: { secret } }).then((result) => {
+      if (result.data.length) {
+        return api.events.patch(
+          result.data[0]._id, // eslint-disable-line
+          { $push: { guests: id } },
+          paramsForServer({ user: store.getState().auth.user.data }),
+        ).then((response) => {
+          dispatch(receiveEvent(response));
 
-        api.events.on('updated', updateEventCallback);
+          api.events.on('patched', updateEventCallback);
+          api.events.on('updated', updateEventCallback);
 
-        return response;
-      }, (error) => {
-        dispatch(receiveEvent({}));
-        return error;
-      });
+          return response;
+        }, (error) => {
+          dispatch(receiveEvent({}));
+          return error;
+        });
+      }
+      dispatch(receiveEvent({}));
+      return result;
+    }, (error) => {
+      dispatch(receiveEvent({}));
+      return error;
+    });
   }
 );
 
@@ -52,7 +64,6 @@ const clearEvent = event => (
     dispatch(resetEvent());
 
     api.events.removeListener('patched', updateEventCallback);
-
     api.events.removeListener('updated', updateEventCallback);
 
     return api.events
