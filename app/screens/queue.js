@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
-import { View, Button, Text, TextInput } from 'react-native';
+import {
+  View,
+  Button,
+  Text,
+  TextInput,
+  Animated,
+} from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -10,16 +16,38 @@ const {
   login: loginAction,
 } = actions;
 
+const HEADER_MAX_HEIGHT = 200;
+const HEADER_MIN_HEIGHT = 60;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+
 export class Register extends Component {
+  static navigationOptions = ({ navigation }) => ({
+    title: navigation.getParam('title', ''),
+    headerStyle: {
+      backgroundColor: '#0E1214',
+      borderBottomWidth: 1,
+      borderBottomColor: '#15191B',
+    },
+    headerTintColor: '#ff005a',
+    headerTitleStyle: {
+      fontFamily: 'Raleway',
+      fontWeight: '800',
+    },
+  });
+
   constructor(props) {
     super(props);
     this.state = {
-      email: '',
-      password: '',
-      error: '',
+      scrollY: new Animated.Value(0),
     };
 
     this.handleRegister = this.handleRegister.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.navigation.setParams({
+      title: this.props.event.name,
+    });
   }
 
   handleRegister() {
@@ -50,6 +78,7 @@ export class Register extends Component {
   }
 
   render() {
+    console.log(this.props.event);
     return (
       <View>
         <Text>
@@ -77,10 +106,18 @@ export class Register extends Component {
 Register.propTypes = {
   createUser: PropTypes.func.isRequired,
   login: PropTypes.func.isRequired,
+  event: PropTypes.shape({
+    queue: PropTypes.array.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+  navigation: PropTypes.shape({
+    setParams: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
-const RegisterConnector = connect(() => (
+const RegisterConnector = connect(state => (
   {
+    event: state.event.event.data,
   }
 ), dispatch => (
   {
