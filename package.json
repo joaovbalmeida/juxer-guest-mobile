@@ -20,6 +20,7 @@
     "react": "16.4.1",
     "react-native": "0.56.0",
     "react-native-fbsdk": "^0.7.0",
+    "react-native-parallax-scroll-view": "^0.21.3",
     "react-navigation": "^2.11.2",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",

@@ -24,7 +24,7 @@ class Checkin extends Component {
   }
 
   componentDidMount() {
-    if (this.props.event) {
+    if (this.props.event.active) {
       this.props.navigation.navigate('Event');
     }
   }
@@ -52,7 +52,9 @@ class Checkin extends Component {
 
 Checkin.propTypes = {
   startEvent: PropTypes.func.isRequired,
-  event: PropTypes.shape({}).isRequired,
+  event: PropTypes.shape({
+    active: PropTypes.bool,
+  }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
