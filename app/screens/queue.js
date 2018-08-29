@@ -7,11 +7,15 @@ import {
   Text,
   Image,
   TouchableHighlight,
+  TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 
+import AddSong from '../assets/images/addSong.png';
+import Settings from '../assets/images/settings.png';
 import Track from '../components/track';
 import actions from '../store/actions';
 
@@ -24,18 +28,38 @@ export class Queue extends Component {
     header: null,
   });
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      scroll: new Animated.Value(0),
+    };
+  }
+
   render() {
     const { queue } = this.props.event;
+    const imageOpacity = this.state.scroll.interpolate({
+      inputRange: [0, 130, 260],
+      outputRange: [1, 1, 0],
+      extrapolate: 'clamp',
+    });
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
         <FlatList
           style={styles.flatlist}
           data={this.props.event.queue}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
+          )}
           ListHeaderComponent={() => (
             <View style={styles.header}>
-              <TouchableHighlight style={styles.orderButton}>
-                <Text style={styles.orderText}>Pedir Música</Text>
+              <TouchableHighlight
+                underlayColor="#9d0037"
+                style={styles.orderButton}
+                onPress={() => console.log(1)}
+              >
+                <Image source={AddSong} style={styles.add} />
               </TouchableHighlight>
             </View>
           )}
@@ -54,9 +78,8 @@ export class Queue extends Component {
             <ParallaxScrollView
               backgroundColor="transparent"
               contentBackgroundColor="#15191B"
-              parallaxHeaderHeight={380}
+              parallaxHeaderHeight={400}
               stickyHeaderHeight={120}
-              onChangeHeaderVisibility={visible => console.log(visible)}
               renderForeground={() => (
                 <View style={styles.foregroundContainer}>
                   <Image
@@ -85,14 +108,25 @@ export class Queue extends Component {
                   />
                 </View>
               )}
-              renderStickyHeader={() => (
-                <View style={styles.stickyContainer}>
-                  <Text style={styles.title}>
-                    {queue[0].name}
-                  </Text>
-                  <Text style={styles.artist}>
-                    {`${queue[0].artist} - ${queue[0].album}`}
-                  </Text>
+              renderFixedHeader={() => (
+                <View style={styles.fixedContainer}>
+                  <View style={styles.side} />
+                  <View style={{ ...styles.center, opacity: imageOpacity }}>
+                    <Text style={styles.headerTitle}>
+                      {queue[0].name}
+                    </Text>
+                    <Text style={styles.headerArtist}>
+                      {queue[0].artist}
+                    </Text>
+                  </View>
+                  <View styles={styles.side}>
+                    <TouchableOpacity
+                      style={styles.settingsButton}
+                      onPress={() => console.log(2)}
+                    >
+                      <Image source={Settings} style={styles.settings} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             />
@@ -126,7 +160,6 @@ const styles = StyleSheet.create({
   flatlist: {
     flex: 1,
     backgroundColor: '#15191B',
-    zIndex: 999999,
   },
   separator: {
     width: '100%',
@@ -134,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#15191B',
   },
   foregroundContainer: {
-    height: 380,
+    height: 400,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -143,7 +176,7 @@ const styles = StyleSheet.create({
     width: '55%',
     aspectRatio: 1,
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: 20,
   },
   title: {
     ...textStyles,
@@ -164,7 +197,7 @@ const styles = StyleSheet.create({
     color: '#FF005A',
   },
   backgroundContainer: {
-    height: 380,
+    height: 400,
     width: '100%',
   },
   backgroundImage: {
@@ -182,25 +215,58 @@ const styles = StyleSheet.create({
   },
   orderButton: {
     position: 'absolute',
-    top: -15,
+    top: -10,
     backgroundColor: '#FF005A',
     height: 35,
-    width: 180,
+    width: 80,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  orderText: {
-    ...textStyles,
-    fontSize: 17,
-    fontWeight: '700',
+  add: {
+    height: 24,
+    width: 24,
   },
-  stickyContainer: {
+  fixedContainer: {
     height: 120,
     width: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
+  },
+  side: {
+    width: 50,
+    height: '100%',
+  },
+  center: {
+    flex: 1,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsButton: {
+    height: 30,
+    width: 30,
+    marginRight: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settings: {
+    height: 24,
+    width: 24,
+  },
+  headerTitle: {
+    ...textStyles,
+    fontSize: 15,
+    fontWeight: '700',
+    paddingTop: 12,
+  },
+  headerArtist: {
+    ...textStyles,
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 5,
   },
 });
 
