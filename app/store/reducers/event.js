@@ -2,7 +2,10 @@ const initialState = {
   event: {
     isFetching: false,
     lastUpdated: '',
-    data: {},
+    data: {
+      queue: [],
+      playlists: [],
+    },
   },
 };
 
@@ -31,7 +34,10 @@ const event = (state = initialState, action) => {
         event: {
           isFetching: false,
           lastUpdated: '',
-          data: {},
+          data: {
+            queue: [],
+            playlists: [],
+          },
         },
       });
 

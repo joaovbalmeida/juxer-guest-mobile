@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   ImageBackground,
+  TouchableHighlight,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -16,9 +17,27 @@ import Placeholder from '../assets/images/profilePlaceholder.jpg';
 
 const {
   updateAnonym: updateAnonymAction,
+  logout: logoutAction,
+  clearEvent: clearEventAction,
 } = actions;
 
 export class Settings extends Component {
+  leaveEvent() {
+    Promise.resolve(this.props.clearEvent(this.props.event._id)) // eslint-disable-line
+      .then(() => {
+        this.props.navigation.navigate('Checkin');
+      });
+  }
+
+  logout() {
+    Promise.all([
+      this.props.event._id ? this.props.clearEvent(this.props.event._id) : null, //eslint-disable-line
+      this.props.logout(),
+    ]).then(() => {
+      this.props.navigation.navigate('Auth');
+    });
+  }
+
   render() {
     const { name, picture } = this.props.user;
     return (
@@ -50,6 +69,36 @@ export class Settings extends Component {
               onTintColor="#ff005a"
             />
           </View>
+          <View style={styles.emptyRow} />
+          <View style={styles.exitRow}>
+            {
+              this.props.event._id // eslint-disable-line
+                ? (
+                  <View>
+                    <TouchableHighlight
+                      underlayColor="#1e2326"
+                      style={styles.leaveEventRow}
+                      onPress={() => this.leaveEvent()}
+                    >
+                      <Text style={styles.label}>
+                        Sair do Evento
+                      </Text>
+                    </TouchableHighlight>
+                    <View style={styles.separator} />
+                  </View>
+                )
+                : null
+              }
+            <TouchableHighlight
+              underlayColor="#1e2326"
+              style={styles.logoutRow}
+              onPress={() => this.logout()}
+            >
+              <Text style={styles.label}>
+                Logout
+              </Text>
+            </TouchableHighlight>
+          </View>
         </ScrollView>
       </View>
     );
@@ -58,7 +107,7 @@ export class Settings extends Component {
 
 const row = {
   flexDirection: 'row',
-  height: 60,
+  height: 50,
   width: '100%',
   backgroundColor: '#0E1214',
   justifyContent: 'space-between',
@@ -78,6 +127,11 @@ const styles = StyleSheet.create({
   emptyRow: {
     height: 40,
     width: '100%',
+  },
+  separator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#15191B',
   },
   backgroundImage: {
     height: 280,
@@ -103,6 +157,14 @@ const styles = StyleSheet.create({
   anonymRow: {
     ...row,
   },
+  leaveEventRow: {
+    ...row,
+    justifyContent: 'center',
+  },
+  logoutRow: {
+    ...row,
+    justifyContent: 'center',
+  },
   label: {
     fontFamily: 'Raleway',
     fontSize: 16,
@@ -113,10 +175,16 @@ const styles = StyleSheet.create({
 
 Settings.propTypes = {
   updateAnonym: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
+  clearEvent: PropTypes.func.isRequired,
   anonym: PropTypes.bool.isRequired,
   user: PropTypes.shape({
     picture: PropTypes.string,
     name: PropTypes.string,
+  }).isRequired,
+  event: PropTypes.shape({
+    active: PropTypes.bool,
+    _id: PropTypes.string,
   }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
@@ -133,6 +201,12 @@ const SettingsConnector = connect(state => (
   {
     updateAnonym: anonym => (
       dispatch(updateAnonymAction(anonym))
+    ),
+    logout: () => (
+      dispatch(logoutAction())
+    ),
+    clearEvent: event => (
+      dispatch(clearEventAction(event))
     ),
   }
 ))(Settings);
