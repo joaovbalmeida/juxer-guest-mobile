@@ -10,6 +10,7 @@ const initialState = {
     lastUpdated: '',
     data: {},
   },
+  anonym: false,
 };
 
 const auth = (state = initialState, action) => {
@@ -39,6 +40,7 @@ const auth = (state = initialState, action) => {
           lastUpdated: '',
           data: {},
         },
+        anonym: false,
       });
 
     case 'REQUEST_TOKEN':
@@ -59,6 +61,11 @@ const auth = (state = initialState, action) => {
           lastUpdated: Date.now(),
         },
         authenticated: action.auth,
+      });
+
+    case 'UPDATE_ANONYM':
+      return Object.assign({}, state, {
+        anonym: action.anonym,
       });
 
     default:

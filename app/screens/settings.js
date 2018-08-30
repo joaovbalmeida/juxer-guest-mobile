@@ -1,108 +1,140 @@
 import React, { Component } from 'react';
-import { View, Button, Text, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  Switch,
+  ScrollView,
+  StyleSheet,
+  ImageBackground,
+} from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import actions from '../store/actions';
+import Placeholder from '../assets/images/profilePlaceholder.jpg';
 
 const {
-  createUser: createUserAction,
-  login: loginAction,
+  updateAnonym: updateAnonymAction,
 } = actions;
 
-export class Register extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      name: '',
-      password: '',
-      error: '',
-    };
-
-    this.handleRegister = this.handleRegister.bind(this);
-  }
-
-  handleRegister() {
-    this.setState({
-      error: '',
-    });
-    this.props.createUser({
-      email: this.state.email,
-      name: this.state.name,
-      password: this.state.password,
-    }).then((response) => {
-      if (response.message && response.code.toString().startsWith('4')) {
-        this.setState({
-          error: 'Não foi possivel criar usuário',
-        });
-      } else {
-        this.props.login({
-          email: this.state.email,
-          password: this.state.password,
-        }).then((result) => {
-          if (result.message && result.code.toString().startsWith('4')) {
-            this.setState({
-              error: 'Não foi possivel fazer login',
-            });
-          } else if (result.data.length) {
-            this.props.navigation.navigate('App');
-          }
-        });
-      }
-    });
-  }
-
+export class Settings extends Component {
   render() {
+    const { name, picture } = this.props.user;
     return (
-      <View>
-        <Text>
-          {this.state.error}
-        </Text>
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={email => this.setState({ email })}
-          value={this.state.email}
-        />
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={name => this.setState({ name })}
-          value={this.state.name}
-        />
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={password => this.setState({ password })}
-          value={this.state.password}
-        />
-        <Button
-          title="Register"
-          onPress={this.handleRegister}
-        />
+      <View style={styles.container}>
+        <ScrollView style={styles.scroll}>
+          <ImageBackground
+            style={styles.backgroundImage}
+            blurRadius={18}
+            resizeMode="cover"
+            opacity={0.3}
+            source={picture ? { uri: picture } : null}
+          >
+            <Image
+              source={picture ? { uri: picture } : Placeholder}
+              style={styles.picture}
+            />
+            <Text style={styles.name}>
+              {name}
+            </Text>
+          </ImageBackground>
+          <View style={styles.emptyRow} />
+          <View style={styles.anonymRow}>
+            <Text style={styles.label}>
+              Modo Anónimo
+            </Text>
+            <Switch
+              value={this.props.anonym}
+              onValueChange={anonym => this.props.updateAnonym(anonym)}
+              onTintColor="#ff005a"
+            />
+          </View>
+        </ScrollView>
       </View>
     );
   }
 }
 
-Register.propTypes = {
-  createUser: PropTypes.func.isRequired,
-  login: PropTypes.func.isRequired,
+const row = {
+  flexDirection: 'row',
+  height: 60,
+  width: '100%',
+  backgroundColor: '#0E1214',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: 20,
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#15191B',
+  },
+  scroll: {
+    flex: 1,
+    backgroundColor: '#15191B',
+  },
+  emptyRow: {
+    height: 40,
+    width: '100%',
+  },
+  backgroundImage: {
+    height: 280,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  picture: {
+    height: 150,
+    width: 150,
+    borderRadius: 75,
+    borderWidth: 1,
+    borderColor: 'white',
+    marginTop: 10,
+  },
+  name: {
+    fontFamily: 'Raleway',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#ff005a',
+    paddingTop: 25,
+  },
+  anonymRow: {
+    ...row,
+  },
+  label: {
+    fontFamily: 'Raleway',
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'white',
+  },
+});
+
+Settings.propTypes = {
+  updateAnonym: PropTypes.func.isRequired,
+  anonym: PropTypes.bool.isRequired,
+  user: PropTypes.shape({
+    picture: PropTypes.string,
+    name: PropTypes.string,
+  }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
 
-const RegisterConnector = connect(() => (
+const SettingsConnector = connect(state => (
   {
+    event: state.event.event.data,
+    user: state.auth.user.data,
+    anonym: state.auth.anonym,
   }
 ), dispatch => (
   {
-    createUser: credentials => (
-      dispatch(createUserAction(credentials))
-    ),
-    login: credentials => (
-      dispatch(loginAction(credentials))
+    updateAnonym: anonym => (
+      dispatch(updateAnonymAction(anonym))
     ),
   }
-))(Register);
+))(Settings);
 
-export default RegisterConnector;
+export default SettingsConnector;

@@ -33,6 +33,13 @@ const resetUser = () => (
   }
 );
 
+const updateAnonym = anonym => (
+  {
+    type: 'UPDATE_ANONYM',
+    anonym,
+  }
+);
+
 const login = credentials => (
   (dispatch) => {
     dispatch(requestToken());
@@ -149,4 +156,5 @@ export default {
   createUser,
   fetchFBUser,
   checkToken,
+  updateAnonym,
 };

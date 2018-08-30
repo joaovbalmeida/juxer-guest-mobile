@@ -1,11 +1,11 @@
 import { createSwitchNavigator } from 'react-navigation';
 
-import EventStack from './event';
-import CheckinScreen from '../screens/checkin';
+import CheckinStack from './checkin';
+import EventTab from './event';
 
 const AppStack = createSwitchNavigator({
-  Checkin: CheckinScreen,
-  Event: EventStack,
+  Checkin: CheckinStack,
+  Event: EventTab,
 }, {
   initialRouteName: 'Checkin',
 });

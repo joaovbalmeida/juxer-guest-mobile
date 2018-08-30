@@ -4,7 +4,6 @@ import {
   TouchableHighlight,
   StatusBar,
   StyleSheet,
-  Text,
   ImageBackground,
   Animated,
   ScrollView,
@@ -15,17 +14,8 @@ import PropTypes from 'prop-types';
 
 import AddSong from '../assets/images/addSong.png';
 import Track from '../components/track';
-import actions from '../store/actions';
-
-const {
-  createUser: createUserAction,
-} = actions;
 
 export class Queue extends Component {
-  static navigationOptions = () => ({
-    header: null,
-  });
-
   constructor(props) {
     super(props);
 
@@ -36,7 +26,7 @@ export class Queue extends Component {
 
   renderScrollContent() {
     return (
-      <View style={{ marginTop: 400 }}>
+      <View style={{ marginTop: 380 }}>
         <View style={styles.header} />
         <View style={styles.separator} />
         { this.props.event.queue.map((item, index) => (
@@ -60,13 +50,17 @@ export class Queue extends Component {
   render() {
     const { queue } = this.props.event;
     const opacity = this.state.y.interpolate({
-      inputRange: [0, 140, 280],
-      outputRange: [1, 0.5, 0],
+      inputRange: [0, 130, 260],
+      outputRange: [1, 0.1, 0],
       extrapolate: 'clamp',
     });
     const height = this.state.y.interpolate({
-      inputRange: [0, 280],
-      outputRange: [400, 120],
+      inputRange: [0, 260],
+      outputRange: [380, 120],
+    });
+    const translateY = this.state.y.interpolate({
+      inputRange: [0, 260],
+      outputRange: [0, -100],
       extrapolate: 'clamp',
     });
     return (
@@ -74,7 +68,7 @@ export class Queue extends Component {
         <StatusBar barStyle="light-content" />
         <ScrollView
           style={styles.flatlist}
-          scrollEventThrottle={1}
+          scrollEventThrottle={16}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: this.state.y } } }],
           )}
@@ -90,22 +84,22 @@ export class Queue extends Component {
             opacity={0.3}
           >
             <Animated.Image
-              style={{ ...styles.cover, opacity }}
+              style={{ ...styles.cover, opacity, transform: [{ translateY }] }}
               source={{ uri: queue[0].cover }}
             />
-            <Text style={styles.title}>
+            <Animated.Text style={{ ...styles.title, transform: [{ translateY }] }}>
               {queue[0].name}
-            </Text>
-            <Text style={styles.artist}>
+            </Animated.Text>
+            <Animated.Text style={{ ...styles.artist, transform: [{ translateY }] }}>
               {`${queue[0].artist} - ${queue[0].album}`}
-            </Text>
-            <Animated.Text style={{ ...styles.owner, opacity }}>
+            </Animated.Text>
+            <Animated.Text style={{ ...styles.owner, opacity, transform: [{ translateY }] }}>
               {queue[0].owner}
             </Animated.Text>
             <TouchableHighlight
               underlayColor="#9d0037"
               style={styles.orderButton}
-              onPress={() => console.log(1)}
+              onPress={() => this.props.navigation.navigate('Playlists')}
             >
               <Image source={AddSong} style={styles.add} />
             </TouchableHighlight>
@@ -123,6 +117,7 @@ Queue.propTypes = {
   }).isRequired,
   navigation: PropTypes.shape({
     setParams: PropTypes.func.isRequired,
+    navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
 
@@ -156,6 +151,7 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cover: {
     width: '55%',
@@ -208,12 +204,6 @@ const QueueConnector = connect(state => (
   {
     event: state.event.event.data,
   }
-), dispatch => (
-  {
-    createUser: credentials => (
-      dispatch(createUserAction(credentials))
-    ),
-  }
-))(Queue);
+), () => ({}))(Queue);
 
 export default QueueConnector;

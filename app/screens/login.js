@@ -65,7 +65,7 @@ class Login extends Component {
             const credentials = {
               email: user.email,
               name: user.name,
-              picture: `/${user.id}/picture?type=square`,
+              picture: user.picture.data.url,
               facebookId: user.id,
             };
             this.props.fetchFBUser(credentials).then((result) => {
@@ -93,7 +93,7 @@ class Login extends Component {
           {
             parameters: {
               fields: {
-                string: 'email,name,first_name,middle_name,last_name',
+                string: 'email,name,first_name,middle_name,last_name,picture.type(large)',
               },
             },
           },
