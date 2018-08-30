@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
 import {
   View,
-  FlatList,
+  TouchableHighlight,
   StatusBar,
   StyleSheet,
   Text,
-  Image,
-  TouchableHighlight,
-  TouchableOpacity,
+  ImageBackground,
   Animated,
+  ScrollView,
+  Image,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import ParallaxScrollView from 'react-native-parallax-scroll-view';
 
 import AddSong from '../assets/images/addSong.png';
-import Settings from '../assets/images/settings.png';
 import Track from '../components/track';
 import actions from '../store/actions';
 
@@ -32,38 +30,19 @@ export class Queue extends Component {
     super(props);
 
     this.state = {
-      scroll: new Animated.Value(0),
+      y: new Animated.Value(0),
     };
   }
 
-  render() {
-    const { queue } = this.props.event;
-    const imageOpacity = this.state.scroll.interpolate({
-      inputRange: [0, 130, 260],
-      outputRange: [1, 1, 0],
-      extrapolate: 'clamp',
-    });
+  renderScrollContent() {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <FlatList
-          style={styles.flatlist}
-          data={this.props.event.queue}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
-          )}
-          ListHeaderComponent={() => (
-            <View style={styles.header}>
-              <TouchableHighlight
-                underlayColor="#9d0037"
-                style={styles.orderButton}
-                onPress={() => console.log(1)}
-              >
-                <Image source={AddSong} style={styles.add} />
-              </TouchableHighlight>
-            </View>
-          )}
-          renderItem={({ item, index }) => (
+      <View style={{ marginTop: 400 }}>
+        <View style={styles.header} />
+        <View style={styles.separator} />
+        { this.props.event.queue.map((item, index) => (
+          <View
+            key={item._id} //eslint-disable-line
+          >
             <Track
               order={(index + 1).toString()}
               name={item.name}
@@ -71,67 +50,67 @@ export class Queue extends Component {
               cover={item.cover}
               owner={item.owner}
             />
+            <View style={styles.separator} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  render() {
+    const { queue } = this.props.event;
+    const opacity = this.state.y.interpolate({
+      inputRange: [0, 140, 280],
+      outputRange: [1, 0.5, 0],
+      extrapolate: 'clamp',
+    });
+    const height = this.state.y.interpolate({
+      inputRange: [0, 280],
+      outputRange: [400, 120],
+      extrapolate: 'clamp',
+    });
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <ScrollView
+          style={styles.flatlist}
+          scrollEventThrottle={1}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: this.state.y } } }],
           )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          keyExtractor={item => item._id} // eslint-disable-line
-          renderScrollComponent={() => (
-            <ParallaxScrollView
-              backgroundColor="transparent"
-              contentBackgroundColor="#15191B"
-              parallaxHeaderHeight={400}
-              stickyHeaderHeight={120}
-              renderForeground={() => (
-                <View style={styles.foregroundContainer}>
-                  <Image
-                    style={styles.cover}
-                    source={{ uri: queue[0].cover }}
-                  />
-                  <Text style={styles.title}>
-                    {queue[0].name}
-                  </Text>
-                  <Text style={styles.artist}>
-                    {`${queue[0].artist} - ${queue[0].album}`}
-                  </Text>
-                  <Text style={styles.owner}>
-                    {queue[0].owner}
-                  </Text>
-                </View>
-              )}
-              renderBackground={() => (
-                <View style={styles.backgroundContainer}>
-                  <Image
-                    style={styles.backgroundImage}
-                    blurRadius={18}
-                    source={{ uri: queue[0].cover }}
-                    resizeMode="cover"
-                    opacity={0.3}
-                  />
-                </View>
-              )}
-              renderFixedHeader={() => (
-                <View style={styles.fixedContainer}>
-                  <View style={styles.side} />
-                  <View style={{ ...styles.center, opacity: imageOpacity }}>
-                    <Text style={styles.headerTitle}>
-                      {queue[0].name}
-                    </Text>
-                    <Text style={styles.headerArtist}>
-                      {queue[0].artist}
-                    </Text>
-                  </View>
-                  <View styles={styles.side}>
-                    <TouchableOpacity
-                      style={styles.settingsButton}
-                      onPress={() => console.log(2)}
-                    >
-                      <Image source={Settings} style={styles.settings} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
+        >
+          {this.renderScrollContent()}
+        </ScrollView>
+        <Animated.View style={{ ...styles.foregroundContainer, height }}>
+          <ImageBackground
+            style={styles.backgroundImage}
+            blurRadius={18}
+            source={{ uri: queue[0].cover }}
+            resizeMode="cover"
+            opacity={0.3}
+          >
+            <Animated.Image
+              style={{ ...styles.cover, opacity }}
+              source={{ uri: queue[0].cover }}
             />
-          )}
-        />
+            <Text style={styles.title}>
+              {queue[0].name}
+            </Text>
+            <Text style={styles.artist}>
+              {`${queue[0].artist} - ${queue[0].album}`}
+            </Text>
+            <Animated.Text style={{ ...styles.owner, opacity }}>
+              {queue[0].owner}
+            </Animated.Text>
+            <TouchableHighlight
+              underlayColor="#9d0037"
+              style={styles.orderButton}
+              onPress={() => console.log(1)}
+            >
+              <Image source={AddSong} style={styles.add} />
+            </TouchableHighlight>
+          </ImageBackground>
+        </Animated.View>
       </View>
     );
   }
@@ -161,16 +140,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#15191B',
   },
+  foregroundContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
   separator: {
     width: '100%',
     height: 1,
     backgroundColor: '#15191B',
   },
-  foregroundContainer: {
-    height: 400,
+  backgroundImage: {
+    height: '100%',
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   cover: {
     width: '55%',
@@ -196,26 +181,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FF005A',
   },
-  backgroundContainer: {
-    height: 400,
-    width: '100%',
-  },
-  backgroundImage: {
-    height: '100%',
-    alignItems: 'center',
-  },
   header: {
     height: 30,
     width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: '#15191B',
     backgroundColor: '#0E1214',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   orderButton: {
     position: 'absolute',
-    top: -10,
+    bottom: -18,
     backgroundColor: '#FF005A',
     height: 35,
     width: 80,
@@ -226,47 +201,6 @@ const styles = StyleSheet.create({
   add: {
     height: 24,
     width: 24,
-  },
-  fixedContainer: {
-    height: 120,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  side: {
-    width: 50,
-    height: '100%',
-  },
-  center: {
-    flex: 1,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  settingsButton: {
-    height: 30,
-    width: 30,
-    marginRight: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  settings: {
-    height: 24,
-    width: 24,
-  },
-  headerTitle: {
-    ...textStyles,
-    fontSize: 15,
-    fontWeight: '700',
-    paddingTop: 12,
-  },
-  headerArtist: {
-    ...textStyles,
-    fontSize: 14,
-    fontWeight: '600',
-    paddingVertical: 5,
   },
 });
 
