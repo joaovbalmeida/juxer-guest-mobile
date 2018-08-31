@@ -26,31 +26,16 @@ const updateEventCallback = (data) => {
   store.dispatch(receiveEvent(data));
 };
 
-const startEvent = secret => (
+const fetchEvent = secret => (
   (dispatch) => {
     dispatch(requestEvent());
 
-    const id = store.getState().auth.user.data._id; // eslint-disable-line
-
     return api.events.find({ query: { secret } }).then((result) => {
-      if (result.data.length) {
-        return api.events.patch(
-          result.data[0]._id, // eslint-disable-line
-          { $push: { guests: id } },
-          paramsForServer({ user: store.getState().auth.user.data }),
-        ).then((response) => {
-          dispatch(receiveEvent(response));
-
-          api.events.on('patched', updateEventCallback);
-          api.events.on('updated', updateEventCallback);
-
-          return response;
-        }, (error) => {
-          dispatch(receiveEvent({}));
-          return error;
-        });
+      if (result.data) {
+        dispatch(receiveEvent(result.data[0]));
+      } else {
+        dispatch(receiveEvent({}));
       }
-      dispatch(receiveEvent({}));
       return result;
     }, (error) => {
       dispatch(receiveEvent({}));
@@ -59,10 +44,32 @@ const startEvent = secret => (
   }
 );
 
-const clearEvent = event => (
+const startEvent = event => (
   (dispatch) => {
-    dispatch(resetEvent());
+    dispatch(requestEvent());
 
+    const id = store.getState().auth.user.data._id // eslint-disable-line
+
+    return api.events.patch(
+      event,
+      { $push: { guests: id } },
+      paramsForServer({ user: store.getState().auth.user.data }),
+    ).then((response) => {
+      dispatch(receiveEvent(response));
+
+      api.events.on('patched', updateEventCallback);
+      api.events.on('updated', updateEventCallback);
+
+      return response;
+    }, (error) => {
+      dispatch(receiveEvent({}));
+      return error;
+    });
+  }
+);
+
+const stopEvent = event => (
+  () => {
     api.events.removeListener('patched', updateEventCallback);
     api.events.removeListener('updated', updateEventCallback);
 
@@ -73,6 +80,8 @@ const clearEvent = event => (
 );
 
 export default {
+  fetchEvent,
   startEvent,
-  clearEvent,
+  stopEvent,
+  resetEvent,
 };

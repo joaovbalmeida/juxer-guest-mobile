@@ -8,12 +8,19 @@ import {
   Animated,
   ScrollView,
   Image,
+  Text,
 } from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import MusicNote from '../assets/images/musicNote.png';
 import AddSong from '../assets/images/addSong.png';
 import Track from '../components/track';
+import actions from '../store/actions';
+
+const {
+  pauseEvent: pauseEventAction,
+} = actions;
 
 export class Queue extends Component {
   constructor(props) {
@@ -22,6 +29,10 @@ export class Queue extends Component {
     this.state = {
       y: new Animated.Value(0),
     };
+  }
+
+  componentWillUnmount() {
+    this.props.pauseEvent(this.props.event._id); // eslint-disable-line
   }
 
   renderScrollContent() {
@@ -63,6 +74,23 @@ export class Queue extends Component {
       outputRange: [0, -100],
       extrapolate: 'clamp',
     });
+    if (!this.props.event.queue) {
+      return (
+        <View style={styles.emptyQueue}>
+          <StatusBar barStyle="light-content" />
+          <Image
+            source={MusicNote}
+            style={styles.musicNote}
+          />
+          <Text style={styles.emptyTitle}>
+            Não há músicas na fila
+          </Text>
+          <Text style={styles.emptySubtitle}>
+            Adicione uma música ou espere uma entrar na fila.
+          </Text>
+        </View>
+      );
+    }
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
@@ -111,13 +139,15 @@ export class Queue extends Component {
 }
 
 Queue.propTypes = {
+  pauseEvent: PropTypes.func.isRequired,
   event: PropTypes.shape({
-    queue: PropTypes.array.isRequired,
-    name: PropTypes.string.isRequired,
+    queue: PropTypes.array,
+    name: PropTypes.string,
   }).isRequired,
   navigation: PropTypes.shape({
     setParams: PropTypes.func.isRequired,
     navigate: PropTypes.func.isRequired,
+    getParam: PropTypes.func.isRequired,
   }).isRequired,
 };
 
@@ -127,6 +157,13 @@ const textStyles = {
 };
 
 const styles = StyleSheet.create({
+  emptyQueue: {
+    flex: 1,
+    backgroundColor: '#15191B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: '#15191B',
@@ -198,12 +235,32 @@ const styles = StyleSheet.create({
     height: 24,
     width: 24,
   },
+  emptyTitle: {
+    ...textStyles,
+    fontSize: 20,
+    fontWeight: '600',
+    paddingTop: 20,
+  },
+  emptySubtitle: {
+    ...textStyles,
+    paddingTop: 10,
+  },
+  musicNote: {
+    height: 128,
+    width: 128,
+  },
 });
 
 const QueueConnector = connect(state => (
   {
     event: state.event.event.data,
   }
-), () => ({}))(Queue);
+), dispatch => (
+  {
+    pauseEvent: () => (
+      dispatch(pauseEventAction())
+    ),
+  }
+))(Queue);
 
 export default QueueConnector;

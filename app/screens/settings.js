@@ -18,22 +18,12 @@ import Placeholder from '../assets/images/profilePlaceholder.jpg';
 const {
   updateAnonym: updateAnonymAction,
   logout: logoutAction,
-  clearEvent: clearEventAction,
+  resetEvent: resetEventAction,
 } = actions;
 
 export class Settings extends Component {
-  leaveEvent() {
-    Promise.resolve(this.props.clearEvent(this.props.event._id)) // eslint-disable-line
-      .then(() => {
-        this.props.navigation.navigate('Checkin');
-      });
-  }
-
   logout() {
-    Promise.all([
-      this.props.event._id ? this.props.clearEvent(this.props.event._id) : null, //eslint-disable-line
-      this.props.logout(),
-    ]).then(() => {
+    Promise.resolve(this.props.logout()).then(() => {
       this.props.navigation.navigate('Auth');
     });
   }
@@ -78,7 +68,10 @@ export class Settings extends Component {
                     <TouchableHighlight
                       underlayColor="#1e2326"
                       style={styles.leaveEventRow}
-                      onPress={() => this.leaveEvent()}
+                      onPress={() => {
+                        this.props.resetEvent();
+                        this.props.navigation.navigate('Checkin');
+                      }}
                     >
                       <Text style={styles.label}>
                         Sair do Evento
@@ -92,7 +85,10 @@ export class Settings extends Component {
             <TouchableHighlight
               underlayColor="#1e2326"
               style={styles.logoutRow}
-              onPress={() => this.logout()}
+              onPress={() => {
+                this.resetEvent();
+                this.logout();
+              }}
             >
               <Text style={styles.label}>
                 Logout
@@ -176,7 +172,7 @@ const styles = StyleSheet.create({
 Settings.propTypes = {
   updateAnonym: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired,
-  clearEvent: PropTypes.func.isRequired,
+  resetEvent: PropTypes.func.isRequired,
   anonym: PropTypes.bool.isRequired,
   user: PropTypes.shape({
     picture: PropTypes.string,
@@ -205,8 +201,8 @@ const SettingsConnector = connect(state => (
     logout: () => (
       dispatch(logoutAction())
     ),
-    clearEvent: event => (
-      dispatch(clearEventAction(event))
+    resetEvent: () => (
+      dispatch(resetEventAction())
     ),
   }
 ))(Settings);

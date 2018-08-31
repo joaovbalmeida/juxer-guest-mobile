@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {
   View,
-  Text,
   Button,
   TextInput,
 } from 'react-native';
@@ -11,6 +10,7 @@ import PropTypes from 'prop-types';
 import actions from '../store/actions';
 
 const {
+  fetchEvent: fetchEventAction,
   startEvent: startEventAction,
 } = actions;
 
@@ -24,8 +24,10 @@ class Checkin extends Component {
   }
 
   componentDidMount() {
-    if (this.props.event.active) {
-      this.props.navigation.navigate('Event');
+    if (this.props.event.queue) {
+      this.props.startEvent(this.props.event._id).then(() => { // eslint-disable-line
+        this.props.navigation.navigate('Event');
+      });
     }
   }
 
@@ -40,8 +42,12 @@ class Checkin extends Component {
         <Button
           title="Conectar"
           onPress={() => {
-            this.props.startEvent(this.state.secret).then(() => {
-              this.props.navigation.navigate('Event');
+            this.props.fetchEvent(this.state.secret).then((result) => {
+              if (result.data) {
+                this.props.startEvent(result.data[0]._id).then(() => { //eslint-disable-line
+                  this.props.navigation.navigate('Event');
+                });
+              }
             });
           }}
         />
@@ -51,9 +57,11 @@ class Checkin extends Component {
 }
 
 Checkin.propTypes = {
+  fetchEvent: PropTypes.func.isRequired,
   startEvent: PropTypes.func.isRequired,
   event: PropTypes.shape({
     active: PropTypes.bool,
+    queue: PropTypes.array,
   }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
@@ -66,8 +74,11 @@ const CheckinConnector = connect(state => (
   }
 ), dispatch => (
   {
-    startEvent: secret => (
-      dispatch(startEventAction(secret))
+    fetchEvent: secret => (
+      dispatch(fetchEventAction(secret))
+    ),
+    startEvent: event => (
+      dispatch(startEventAction(event))
     ),
   }
 ))(Checkin);
