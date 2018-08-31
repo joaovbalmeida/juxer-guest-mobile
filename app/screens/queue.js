@@ -93,7 +93,6 @@ export class Queue extends Component {
     }
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
         <ScrollView
           style={styles.flatlist}
           scrollEventThrottle={16}

@@ -10,8 +10,17 @@ import PropTypes from 'prop-types';
 import PlaylistComponent from '../components/playlist';
 
 export class Playlists extends Component {
+  static navigationOptions = {
+    title: 'Playlists',
+    headerTintColor: '#ff005a',
+    headerStyle: {
+      backgroundColor: '#0E1214',
+      borderBottomWidth: 1,
+      borderBottomColor: '#15191B',
+    },
+  }
+
   render() {
-    console.log(this.props.event.playlists);
     return (
       <View style={styles.container}>
         <FlatList
@@ -22,8 +31,8 @@ export class Playlists extends Component {
               name={item.name}
               tracks={item.tracks}
               cover={item.image}
-              start={item.start || ''}
-              end={item.end || ''}
+              start={item.startDate || ''}
+              end={item.endDate || ''}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

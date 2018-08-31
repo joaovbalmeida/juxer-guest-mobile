@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import PropTypes from 'prop-types';
+import Moment from 'moment';
 
 const Playlist = ({
   name,
@@ -13,36 +14,43 @@ const Playlist = ({
   cover,
   start,
   end,
-}) => (
-  <View style={styles.container}>
-    <View style={styles.top}>
-      <View>
+}) => {
+  const components = [];
+  if (start) {
+    components.push((
+      <Text key={0} style={styles.schedule}>
+        {`De: ${Moment(start).format('HH:MM DD/MM')}`}
+      </Text>
+    ));
+  }
+  if (end) {
+    components.push((
+      <Text key={1} style={styles.schedule}>
+        {`Até: ${Moment(end).format('HH:MM DD/MM')}`}
+      </Text>
+    ));
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.leftContainer}>
         <Text style={styles.name}>
           {name}
         </Text>
-        <Text>
-          {`${tracks} Músicas`}
-        </Text>
+        <View style={styles.info}>
+          <Text style={styles.tracks}>
+            {`${tracks} Músicas`}
+          </Text>
+          { components }
+        </View>
       </View>
       <Image
         style={styles.cover}
         source={{ uri: cover }}
       />
     </View>
-    <View style={styles.bottom}>
-      <View style={styles.startContainer}>
-        <Text>
-          {start}
-        </Text>
-      </View>
-      <View style={styles.endContainer}>
-        <Text>
-          {end}
-        </Text>
-      </View>
-    </View>
-  </View>
-);
+  );
+};
 
 Playlist.propTypes = {
   tracks: PropTypes.string.isRequired,
@@ -55,32 +63,44 @@ Playlist.propTypes = {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: 150,
+    height: 120,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#0E1214',
   },
-  top: {
-    width: '100%',
-    height: 80,
-    flexDirection: 'row',
-  },
-  bottom: {
-    width: '100%',
-    height: 70,
-    flexDirection: 'row',
+  leftContainer: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 15,
   },
   cover: {
-    height: 60,
-    width: 60,
+    marginHorizontal: 15,
+    height: 90,
+    width: 90,
   },
   name: {
     color: 'white',
     fontFamily: 'Raleway',
     fontWeight: '600',
     fontSize: 15,
-    paddingBottom: 2,
+    paddingTop: 10,
+  },
+  info: {
+    flex: 1,
+    paddingBottom: 10,
+    justifyContent: 'center',
+  },
+  tracks: {
+    color: 'white',
+    fontFamily: 'Raleway',
+    fontSize: 14,
+  },
+  schedule: {
+    color: 'white',
+    fontFamily: 'Raleway',
+    fontSize: 14,
+    paddingTop: 4,
   },
 });
 
