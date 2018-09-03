@@ -66,7 +66,7 @@ export class Settings extends Component {
                 ? (
                   <View>
                     <TouchableHighlight
-                      underlayColor="#1e2326"
+                      underlayColor="#262d31"
                       style={styles.leaveEventRow}
                       onPress={() => {
                         this.props.resetEvent();

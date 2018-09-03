@@ -4,6 +4,7 @@ import {
   Image,
   StyleSheet,
   View,
+  TouchableHighlight,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import Moment from 'moment';
@@ -14,6 +15,7 @@ const Playlist = ({
   cover,
   start,
   end,
+  onPress,
 }) => {
   const components = [];
   if (start) {
@@ -32,23 +34,28 @@ const Playlist = ({
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        <Text style={styles.name}>
-          {name}
-        </Text>
-        <View style={styles.info}>
-          <Text style={styles.tracks}>
-            {`${tracks} Músicas`}
+    <TouchableHighlight
+      onPress={onPress}
+      underlayColor="#262d31"
+    >
+      <View style={styles.container}>
+        <View style={styles.leftContainer}>
+          <Text style={styles.name}>
+            {name}
           </Text>
-          { components }
+          <View style={styles.info}>
+            <Text style={styles.tracks}>
+              {`${tracks} Músicas`}
+            </Text>
+            { components }
+          </View>
         </View>
+        <Image
+          style={styles.cover}
+          source={{ uri: cover }}
+        />
       </View>
-      <Image
-        style={styles.cover}
-        source={{ uri: cover }}
-      />
-    </View>
+    </TouchableHighlight>
   );
 };
 
@@ -58,6 +65,7 @@ Playlist.propTypes = {
   cover: PropTypes.string.isRequired,
   start: PropTypes.string.isRequired,
   end: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
 };
 
 const styles = StyleSheet.create({

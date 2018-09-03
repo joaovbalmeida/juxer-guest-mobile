@@ -47,6 +47,11 @@ const EventStack = createStackNavigator({
     screen: EventTab,
     navigationOptions: {
       header: null,
+      headerStyle: {
+        backgroundColor: '#0E1214',
+        borderBottomWidth: 1,
+        borderBottomColor: '#15191B',
+      },
     },
   },
   Playlists: PlaylistsScreen,

@@ -33,6 +33,11 @@ export class Playlists extends Component {
               cover={item.image}
               start={item.startDate || ''}
               end={item.endDate || ''}
+              onPress={() => {
+                this.props.navigation.navigate('Songs', {
+                  playlist: item._id, // eslint-disable-line
+                });
+              }}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

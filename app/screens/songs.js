@@ -1,109 +1,80 @@
-
 import React, { Component } from 'react';
-import { View, Button, Text, TextInput } from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+} from 'react-native';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import actions from '../store/actions';
+import Song from '../components/song';
 
-const {
-  createUser: createUserAction,
-  login: loginAction,
-} = actions;
-
-export class Register extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      name: '',
-      password: '',
-      error: '',
-    };
-
-    this.handleRegister = this.handleRegister.bind(this);
-  }
-
-  handleRegister() {
-    this.setState({
-      error: '',
-    });
-    this.props.createUser({
-      email: this.state.email,
-      name: this.state.name,
-      password: this.state.password,
-    }).then((response) => {
-      if (response.message && response.code.toString().startsWith('4')) {
-        this.setState({
-          error: 'Não foi possivel criar usuário',
-        });
-      } else {
-        this.props.login({
-          email: this.state.email,
-          password: this.state.password,
-        }).then((result) => {
-          if (result.message && result.code.toString().startsWith('4')) {
-            this.setState({
-              error: 'Não foi possivel fazer login',
-            });
-          } else if (result.data.length) {
-            this.props.navigation.navigate('App');
-          }
-        });
-      }
-    });
+export class Songs extends Component {
+  static navigationOptions = {
+    title: 'Músicas',
+    headerTintColor: '#ff005a',
+    headerStyle: {
+      backgroundColor: '#0E1214',
+      borderBottomWidth: 1,
+      borderBottomColor: '#15191B',
+    },
   }
 
   render() {
+    console.log(this.props.event.playlists);
     return (
-      <View>
-        <Text>
-          {this.state.error}
-        </Text>
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={email => this.setState({ email })}
-          value={this.state.email}
-        />
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={name => this.setState({ name })}
-          value={this.state.name}
-        />
-        <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={password => this.setState({ password })}
-          value={this.state.password}
-        />
-        <Button
-          title="Register"
-          onPress={this.handleRegister}
+      <View style={styles.container}>
+        <FlatList
+          style={styles.list}
+          data={this.props.event.playlists}
+          renderItem={({ item }) => (
+            <Song
+              name={item.name}
+              artist={item.artist}
+              cover={item.image}
+              album={item.album}
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          keyExtractor={item => item._id} // eslint-disable-line
         />
       </View>
     );
   }
 }
 
-Register.propTypes = {
-  createUser: PropTypes.func.isRequired,
-  login: PropTypes.func.isRequired,
+Songs.propTypes = {
+  event: PropTypes.shape({
+    playlists: PropTypes.array,
+  }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
 
-const RegisterConnector = connect(() => (
-  {
-  }
-), dispatch => (
-  {
-    createUser: credentials => (
-      dispatch(createUserAction(credentials))
-    ),
-    login: credentials => (
-      dispatch(loginAction(credentials))
-    ),
-  }
-))(Register);
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#15191B',
+  },
+  list: {
+    flex: 1,
+    backgroundColor: '#15191B',
+  },
+  separator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#15191B',
+  },
+});
 
-export default RegisterConnector;
+const SongsConnector = connect(state => (
+  {
+    event: state.event.event.data,
+  }
+), () => (
+  {
+  }
+))(Songs);
+
+export default SongsConnector;
