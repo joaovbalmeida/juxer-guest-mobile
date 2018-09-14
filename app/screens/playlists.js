@@ -25,17 +25,17 @@ export class Playlists extends Component {
       <View style={styles.container}>
         <FlatList
           style={styles.list}
-          data={this.props.event.playlists}
+          data={this.props.playlists.data}
           renderItem={({ item }) => (
             <PlaylistComponent
               name={item.name}
-              tracks={item.tracks}
+              tracks={item.total}
               cover={item.image}
               start={item.startDate || ''}
               end={item.endDate || ''}
               onPress={() => {
                 this.props.navigation.navigate('Songs', {
-                  playlist: item._id, // eslint-disable-line
+                  songs: item.tracks, // eslint-disable-line
                 });
               }}
             />
@@ -49,8 +49,8 @@ export class Playlists extends Component {
 }
 
 Playlists.propTypes = {
-  event: PropTypes.shape({
-    playlists: PropTypes.array,
+  playlists: PropTypes.shape({
+    data: PropTypes.array,
   }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 
 const PlaylistsConnector = connect(state => (
   {
-    event: state.event.event.data,
+    playlists: state.playlist.playlists,
   }
 ), () => (
   {

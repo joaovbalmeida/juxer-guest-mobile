@@ -19,7 +19,7 @@ import Track from '../components/track';
 import actions from '../store/actions';
 
 const {
-  pauseEvent: pauseEventAction,
+  stopEvent: stopEventAction,
 } = actions;
 
 export class Queue extends Component {
@@ -32,7 +32,7 @@ export class Queue extends Component {
   }
 
   componentWillUnmount() {
-    this.props.pauseEvent(this.props.event._id); // eslint-disable-line
+    this.props.stopEvent(this.props.event._id, false); // eslint-disable-line
   }
 
   renderScrollContent() {
@@ -74,7 +74,7 @@ export class Queue extends Component {
       outputRange: [0, -100],
       extrapolate: 'clamp',
     });
-    if (!this.props.event.queue) {
+    if (!this.props.event.queue.length) {
       return (
         <View style={styles.emptyQueue}>
           <StatusBar barStyle="light-content" />
@@ -88,6 +88,9 @@ export class Queue extends Component {
           <Text style={styles.emptySubtitle}>
             Adicione uma música ou espere uma entrar na fila.
           </Text>
+          <TouchableHighlight onPress={() => this.props.navigation.navigate('Playlists')}>
+            <Text>pedir musica</Text>
+          </TouchableHighlight>
         </View>
       );
     }
@@ -138,7 +141,7 @@ export class Queue extends Component {
 }
 
 Queue.propTypes = {
-  pauseEvent: PropTypes.func.isRequired,
+  stopEvent: PropTypes.func.isRequired,
   event: PropTypes.shape({
     queue: PropTypes.array,
     name: PropTypes.string,
@@ -256,8 +259,8 @@ const QueueConnector = connect(state => (
   }
 ), dispatch => (
   {
-    pauseEvent: () => (
-      dispatch(pauseEventAction())
+    stopEvent: (event, reset) => (
+      dispatch(stopEventAction(event, reset))
     ),
   }
 ))(Queue);

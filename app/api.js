@@ -22,4 +22,5 @@ export default {
   logout: feathersClient.logout,
   users: feathersClient.service('users'),
   events: feathersClient.service('events'),
+  playlists: feathersClient.service('playlists'),
 };

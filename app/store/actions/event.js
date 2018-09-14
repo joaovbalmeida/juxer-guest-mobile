@@ -68,8 +68,10 @@ const startEvent = event => (
   }
 );
 
-const stopEvent = event => (
-  () => {
+const stopEvent = (event, reset) => (
+  (dispatch) => {
+    if (reset) dispatch(resetEvent());
+
     api.events.removeListener('patched', updateEventCallback);
     api.events.removeListener('updated', updateEventCallback);
 

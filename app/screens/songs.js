@@ -21,17 +21,17 @@ export class Songs extends Component {
   }
 
   render() {
-    console.log(this.props.event.playlists);
+    console.log(this.props.navigation.state.params.songs);
     return (
       <View style={styles.container}>
         <FlatList
           style={styles.list}
-          data={this.props.event.playlists}
+          data={this.props.navigation.state.params.songs}
           renderItem={({ item }) => (
             <Song
               name={item.name}
               artist={item.artist}
-              cover={item.image}
+              cover={item.cover}
               album={item.album}
             />
           )}
@@ -44,11 +44,13 @@ export class Songs extends Component {
 }
 
 Songs.propTypes = {
-  event: PropTypes.shape({
-    playlists: PropTypes.array,
-  }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
+    state: PropTypes.shape({
+      params: PropTypes.shape({
+        songs: PropTypes.array,
+      }).isRequired,
+    }).isRequired,
   }).isRequired,
 };
 
@@ -68,9 +70,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const SongsConnector = connect(state => (
+const SongsConnector = connect(() => (
   {
-    event: state.event.event.data,
   }
 ), () => (
   {

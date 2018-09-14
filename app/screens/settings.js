@@ -18,7 +18,8 @@ import Placeholder from '../assets/images/profilePlaceholder.jpg';
 const {
   updateAnonym: updateAnonymAction,
   logout: logoutAction,
-  resetEvent: resetEventAction,
+  resetPlaylists: resetPlaylistsAction,
+  stopEvent: stopEventAction,
 } = actions;
 
 export class Settings extends Component {
@@ -69,7 +70,7 @@ export class Settings extends Component {
                       underlayColor="#262d31"
                       style={styles.leaveEventRow}
                       onPress={() => {
-                        this.props.resetEvent();
+                        this.props.stopEvent(this.props.event._id, true); // eslint-disable-line
                         this.props.navigation.navigate('Checkin');
                       }}
                     >
@@ -86,7 +87,8 @@ export class Settings extends Component {
               underlayColor="#1e2326"
               style={styles.logoutRow}
               onPress={() => {
-                this.resetEvent();
+                this.props.resetPlaylists();
+                this.props.stopEvent(this.props.event._id, true); // eslint-disable-line
                 this.logout();
               }}
             >
@@ -171,8 +173,9 @@ const styles = StyleSheet.create({
 
 Settings.propTypes = {
   updateAnonym: PropTypes.func.isRequired,
+  resetPlaylists: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired,
-  resetEvent: PropTypes.func.isRequired,
+  stopEvent: PropTypes.func.isRequired,
   anonym: PropTypes.bool.isRequired,
   user: PropTypes.shape({
     picture: PropTypes.string,
@@ -201,8 +204,11 @@ const SettingsConnector = connect(state => (
     logout: () => (
       dispatch(logoutAction())
     ),
-    resetEvent: () => (
-      dispatch(resetEventAction())
+    resetPlaylists: () => (
+      dispatch(resetPlaylistsAction())
+    ),
+    stopEvent: (event, reset) => (
+      dispatch(stopEventAction(event, reset))
     ),
   }
 ))(Settings);

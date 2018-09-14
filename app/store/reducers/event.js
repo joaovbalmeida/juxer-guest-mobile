@@ -4,6 +4,7 @@ const initialState = {
     lastUpdated: '',
     data: {},
   },
+  active: false,
 };
 
 const event = (state = initialState, action) => {
@@ -24,6 +25,7 @@ const event = (state = initialState, action) => {
           lastUpdated: Date.now(),
           data: action.event,
         },
+        active: true,
       });
 
     case 'RESET_EVENT':
@@ -33,6 +35,7 @@ const event = (state = initialState, action) => {
           lastUpdated: '',
           data: {},
         },
+        active: false,
       });
 
     default:
