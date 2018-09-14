@@ -1,15 +1,15 @@
 import api from '../../api';
 
-const requestPlaylist = () => (
+const requestPlaylists = () => (
   {
-    type: 'REQUEST_PLAYLIST',
+    type: 'REQUEST_PLAYLISTS',
   }
 );
 
-const receivePlaylist = playlist => (
+const receivePlaylists = playlists => (
   {
-    type: 'RECEIVE_PLAYLIST',
-    playlist,
+    type: 'RECEIVE_PLAYLISTS',
+    playlists,
   }
 );
 
@@ -19,20 +19,20 @@ const resetPlaylists = () => (
   }
 );
 
-const fetchPlaylist = playlist => (
+const fetchPlaylists = event => (
   (dispatch) => {
-    dispatch(requestPlaylist());
-    return api.playlists.get(playlist).then((response) => {
-      dispatch(receivePlaylist(response));
+    dispatch(requestPlaylists());
+    return api.playlists.find({ query: { event } }).then((response) => {
+      dispatch(receivePlaylists(response.data));
       return response;
     }, (error) => {
-      dispatch(receivePlaylist(false));
+      dispatch(receivePlaylists([]));
       return error;
     }, error => error);
   }
 );
 
 export default {
-  fetchPlaylist,
+  fetchPlaylists,
   resetPlaylists,
 };

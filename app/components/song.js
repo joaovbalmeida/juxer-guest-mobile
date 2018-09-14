@@ -4,6 +4,7 @@ import {
   Image,
   StyleSheet,
   View,
+  TouchableHighlight,
 } from 'react-native';
 import PropTypes from 'prop-types';
 
@@ -12,22 +13,28 @@ const Song = ({
   artist,
   album,
   cover,
+  onPress,
 }) => (
-  <View style={styles.container}>
-    <Image
-      style={styles.image}
-      resizeMode="contain"
-      source={{ uri: cover }}
-    />
-    <View style={styles.labels}>
-      <Text style={styles.name}>
-        {name}
-      </Text>
-      <Text style={styles.artist}>
-        {`${artist} - ${album}`}
-      </Text>
+  <TouchableHighlight
+    onPress={onPress}
+    underlayColor="#262d31"
+  >
+    <View style={styles.container}>
+      <Image
+        style={styles.image}
+        resizeMode="contain"
+        source={{ uri: cover }}
+      />
+      <View style={styles.labels}>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.name}>
+          {name}
+        </Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.artist}>
+          {`${artist} - ${album}`}
+        </Text>
+      </View>
     </View>
-  </View>
+  </TouchableHighlight>
 );
 
 Song.propTypes = {
@@ -35,28 +42,26 @@ Song.propTypes = {
   artist: PropTypes.string.isRequired,
   cover: PropTypes.string.isRequired,
   album: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
 };
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: 80,
+    height: 70,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#0E1214',
+    paddingHorizontal: 10,
   },
   image: {
-    height: 65,
-    width: 65,
+    height: 60,
+    width: 60,
   },
-  order: {
-    color: 'white',
-    fontFamily: 'Raleway',
-    fontSize: 20,
-    width: 50,
-    marginHorizontal: 5,
-    textAlign: 'center',
+  labels: {
+    flex: 1,
+    paddingLeft: 10,
   },
   name: {
     color: 'white',
@@ -66,20 +71,12 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   artist: {
+    paddingTop: 5,
     color: 'white',
     fontFamily: 'Raleway',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 13,
     paddingBottom: 6,
-  },
-  owner: {
-    fontFamily: 'Raleway',
-    fontWeight: '600',
-    color: '#ff005a',
-  },
-  rightSection: {
-    marginLeft: 8,
-    marginRight: 5,
   },
 });
 

@@ -8,7 +8,7 @@ const initialState = {
 
 const playlist = (state = initialState, action) => {
   switch (action.type) {
-    case 'REQUEST_PLAYLIST':
+    case 'REQUEST_PLAYLISTS':
       return Object.assign({}, state, {
         playlists: {
           isFetching: true,
@@ -17,13 +17,12 @@ const playlist = (state = initialState, action) => {
         },
       });
 
-    case 'RECEIVE_PLAYLIST':
+    case 'RECEIVE_PLAYLISTS':
       return Object.assign({}, state, {
         playlists: {
           isFetching: false,
           lastUpdated: Date.now(),
-          data: action.playlist ? [...state.playlists.data, action.playlist]
-            : state.playlists.data,
+          data: action.playlists,
         },
       });
 

@@ -12,8 +12,7 @@ import actions from '../store/actions';
 const {
   fetchEvent: fetchEventAction,
   startEvent: startEventAction,
-  fetchPlaylist: fetchPlaylistAction,
-  resetPlaylists: resetPlaylistsAction,
+  fetchPlaylists: fetchPlaylistsAction,
 } = actions;
 
 class Checkin extends Component {
@@ -30,9 +29,9 @@ class Checkin extends Component {
   }
 
   initEvent() {
-    this.props.resetPlaylists();
-    this.props.event.playlists.forEach(playlist => this.props.fetchPlaylist(playlist));
-    this.props.startEvent(this.props.event._id).then(() => { // eslint-disable-line
+    const id = this.props.event._id // eslint-disable-line
+    this.props.fetchPlaylists(id);
+    this.props.startEvent(id).then(() => {
       this.props.navigation.navigate('Event');
     });
   }
@@ -41,7 +40,7 @@ class Checkin extends Component {
     return (
       <View>
         <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 ,marginTop: 10 }}
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginTop: 10 }}
           onChangeText={secret => this.setState({ secret })}
           value={this.state.code}
         />
@@ -62,8 +61,7 @@ class Checkin extends Component {
 
 Checkin.propTypes = {
   fetchEvent: PropTypes.func.isRequired,
-  fetchPlaylist: PropTypes.func.isRequired,
-  resetPlaylists: PropTypes.func.isRequired,
+  fetchPlaylists: PropTypes.func.isRequired,
   startEvent: PropTypes.func.isRequired,
   active: PropTypes.bool.isRequired,
   event: PropTypes.shape({
@@ -86,11 +84,8 @@ const CheckinConnector = connect(state => (
     fetchEvent: secret => (
       dispatch(fetchEventAction(secret))
     ),
-    fetchPlaylist: playlist => (
-      dispatch(fetchPlaylistAction(playlist))
-    ),
-    resetPlaylists: () => (
-      dispatch(resetPlaylistsAction())
+    fetchPlaylists: playlist => (
+      dispatch(fetchPlaylistsAction(playlist))
     ),
     startEvent: event => (
       dispatch(startEventAction(event))

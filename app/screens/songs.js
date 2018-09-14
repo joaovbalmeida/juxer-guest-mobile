@@ -21,7 +21,6 @@ export class Songs extends Component {
   }
 
   render() {
-    console.log(this.props.navigation.state.params.songs);
     return (
       <View style={styles.container}>
         <FlatList
