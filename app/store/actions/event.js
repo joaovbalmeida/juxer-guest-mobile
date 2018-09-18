@@ -86,7 +86,11 @@ const stopEvent = (event, reset) => (
     api.events.removeListener('updated', updateEventCallback);
 
     return api.events
-      .patch(event, { $pull: { guests: { $eq: store.getState().auth.user._id } } }) // eslint-disable-line
+      .patch(
+        event,
+        { $pull: { guests: { $eq: store.getState().auth.user._id } } }, // eslint-disable-line
+        paramsForServer({ user: store.getState().auth.user.data }),
+      )
       .then(response => response, error => error);
   }
 );
