@@ -26,6 +26,16 @@ const updateEventCallback = (data) => {
   store.dispatch(receiveEvent(data));
 };
 
+const requestTrack = track => (
+  () => (
+    api.events.patch(
+      store.getState().event.event.data._id, // eslint-disable-line
+      { $push: { queue: track } },
+      paramsForServer({ user: store.getState().auth.user.data }),
+    ).then(response => response, error => error)
+  )
+);
+
 const fetchEvent = secret => (
   (dispatch) => {
     dispatch(requestEvent());
@@ -85,5 +95,6 @@ export default {
   fetchEvent,
   startEvent,
   stopEvent,
+  requestTrack,
   resetEvent,
 };

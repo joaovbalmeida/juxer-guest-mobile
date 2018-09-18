@@ -8,6 +8,11 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import Song from '../components/song';
+import actions from '../store/actions';
+
+const {
+  requestTrack: requestTrackAction,
+} = actions;
 
 export class Songs extends Component {
   static navigationOptions = {
@@ -32,6 +37,9 @@ export class Songs extends Component {
               artist={item.artist}
               cover={item.cover}
               album={item.album}
+              onPress={() => this.props.requestTrack(Object.assign({}, item, {
+                owner: this.props.user.name,
+              }))}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -43,6 +51,10 @@ export class Songs extends Component {
 }
 
 Songs.propTypes = {
+  requestTrack: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+  }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
     state: PropTypes.shape({
@@ -69,11 +81,15 @@ const styles = StyleSheet.create({
   },
 });
 
-const SongsConnector = connect(() => (
+const SongsConnector = connect(state => (
   {
+    user: state.auth.user.data,
   }
-), () => (
+), dispatch => (
   {
+    requestTrack: track => (
+      dispatch(requestTrackAction(track))
+    ),
   }
 ))(Songs);
 

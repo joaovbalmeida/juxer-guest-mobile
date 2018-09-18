@@ -38,22 +38,27 @@ export class Queue extends Component {
   renderScrollContent() {
     return (
       <View style={{ marginTop: 380 }}>
-        <View style={styles.header} />
+        {
+          this.props.event.queue.length > 1 ? <View style={styles.header} /> : null
+        }
         <View style={styles.separator} />
-        { this.props.event.queue.map((item, index) => (
-          <View
-            key={item._id} //eslint-disable-line
-          >
-            <Track
-              order={(index + 1).toString()}
-              name={item.name}
-              artist={item.artist}
-              cover={item.cover}
-              owner={item.owner}
-            />
-            <View style={styles.separator} />
-          </View>
-        ))}
+        { this.props.event.queue.map((item, index) => {
+          if (index === 0) return null;
+          return (
+            <View
+              key={item._id} //eslint-disable-line
+            >
+              <Track
+                order={(index + 1).toString()}
+                name={item.name}
+                artist={item.artist}
+                cover={item.cover}
+                owner={item.owner}
+              />
+              <View style={styles.separator} />
+            </View>
+          );
+        })}
       </View>
     );
   }
@@ -68,10 +73,11 @@ export class Queue extends Component {
     const height = this.state.y.interpolate({
       inputRange: [0, 260],
       outputRange: [380, 120],
+      extrapolateRight: 'clamp',
     });
     const translateY = this.state.y.interpolate({
       inputRange: [0, 260],
-      outputRange: [0, -100],
+      outputRange: [0, -110],
       extrapolate: 'clamp',
     });
     if (!this.props.event.queue.length) {
@@ -180,6 +186,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
+    backgroundColor: '#0E1214',
   },
   separator: {
     width: '100%',
