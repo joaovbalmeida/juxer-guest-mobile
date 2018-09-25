@@ -63,7 +63,7 @@ export class Settings extends Component {
           <View style={styles.emptyRow} />
           <View style={styles.exitRow}>
             {
-              this.props.event._id // eslint-disable-line
+              this.props.active // eslint-disable-line
                 ? (
                   <View>
                     <TouchableHighlight
@@ -193,6 +193,7 @@ Settings.propTypes = {
 const SettingsConnector = connect(state => (
   {
     event: state.event.event.data,
+    active: state.event.active,
     user: state.auth.user.data,
     anonym: state.auth.anonym,
   }

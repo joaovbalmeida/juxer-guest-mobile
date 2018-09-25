@@ -25,13 +25,14 @@ class Checkin extends Component {
   }
 
   componentDidMount() {
-    if (this.props.active) this.initEvent();
+    if (this.props.active) this.initEvent(this.props.event._id); // eslint-disable-line
   }
 
-  initEvent() {
-    const id = this.props.event._id // eslint-disable-line
-    this.props.fetchPlaylists(id);
-    this.props.startEvent(id).then(() => {
+  initEvent(id) {
+    Promise.all([
+      this.props.fetchPlaylists(id),
+      this.props.startEvent(id),
+    ]).then(() => {
       this.props.navigation.navigate('Event');
     });
   }
@@ -48,8 +49,8 @@ class Checkin extends Component {
           title="Conectar"
           onPress={() => {
             this.props.fetchEvent(this.state.secret).then((result) => {
-              if (result.data) {
-                this.initEvent();
+              if (result.data.length > 0 && result.data !== undefined) {
+                this.initEvent(result.data[0]._id); // eslint-disable-line
               }
             });
           }}

@@ -9,10 +9,11 @@ const requestEvent = () => (
   }
 );
 
-const receiveEvent = event => (
+const receiveEvent = (event, active) => (
   {
     type: 'RECEIVE_EVENT',
     event,
+    active,
   }
 );
 
@@ -23,35 +24,21 @@ const resetEvent = () => (
 );
 
 const updateEventCallback = (data) => {
-  store.dispatch(receiveEvent(data));
+  store.dispatch(receiveEvent(data, true));
 };
 
 const requestTrack = track => (
   () => (
     api.events.patch(
       store.getState().event.event.data._id, // eslint-disable-line
-      { $push: { queue: track } },
+      { $addToSet: { queue: track } },
       paramsForServer({ user: store.getState().auth.user.data }),
     ).then(response => response, error => error)
   )
 );
 
 const fetchEvent = secret => (
-  (dispatch) => {
-    dispatch(requestEvent());
-
-    return api.events.find({ query: { secret } }).then((result) => {
-      if (result.data) {
-        dispatch(receiveEvent(result.data[0]));
-      } else {
-        dispatch(receiveEvent({}));
-      }
-      return result;
-    }, (error) => {
-      dispatch(receiveEvent({}));
-      return error;
-    });
-  }
+  () => api.events.find({ query: { secret } }).then(result => result, error => error)
 );
 
 const startEvent = event => (
@@ -59,20 +46,33 @@ const startEvent = event => (
     dispatch(requestEvent());
 
     const id = store.getState().auth.user.data._id // eslint-disable-line
-
-    return api.events.patch(
-      event,
-      { $push: { guests: id } },
-      paramsForServer({ user: store.getState().auth.user.data }),
-    ).then((response) => {
-      dispatch(receiveEvent(response));
+    return api.events.patch(event, { $addToSet: { guests: id } }, paramsForServer({
+      user: store.getState().auth.user.data,
+    })).then((response) => {
+      dispatch(receiveEvent(response, true));
 
       api.events.on('patched', updateEventCallback);
       api.events.on('updated', updateEventCallback);
 
       return response;
     }, (error) => {
-      dispatch(receiveEvent({}));
+      if (error.code === 409) {
+        return api.events.get(
+          event,
+          paramsForServer({ user: store.getState().auth.user.data }),
+        ).then((response) => {
+          dispatch(receiveEvent(response, true));
+
+          api.events.on('patched', updateEventCallback);
+          api.events.on('updated', updateEventCallback);
+
+          return response;
+        }, (err) => {
+          dispatch(receiveEvent({}, false));
+          return err;
+        });
+      }
+      dispatch(receiveEvent({}, false));
       return error;
     });
   }

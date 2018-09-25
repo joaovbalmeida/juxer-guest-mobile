@@ -25,7 +25,7 @@ const event = (state = initialState, action) => {
           lastUpdated: Date.now(),
           data: action.event,
         },
-        active: true,
+        active: action.active,
       });
 
     case 'RESET_EVENT':

@@ -26,11 +26,14 @@ export class Songs extends Component {
   }
 
   render() {
+    const queue = this.props.event.queue.map(track => track.uri);
     return (
       <View style={styles.container}>
         <FlatList
           style={styles.list}
-          data={this.props.navigation.state.params.songs}
+          data={this.props.navigation.state.params.songs.filter(item => (
+            !queue.includes(item.uri)
+          ))}
           renderItem={({ item }) => (
             <Song
               name={item.name}
@@ -54,6 +57,9 @@ Songs.propTypes = {
   requestTrack: PropTypes.func.isRequired,
   user: PropTypes.shape({
     name: PropTypes.string.isRequired,
+  }).isRequired,
+  event: PropTypes.shape({
+    queue: PropTypes.array.isRequired,
   }).isRequired,
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
@@ -84,6 +90,7 @@ const styles = StyleSheet.create({
 const SongsConnector = connect(state => (
   {
     user: state.auth.user.data,
+    event: state.event.event.data,
   }
 ), dispatch => (
   {

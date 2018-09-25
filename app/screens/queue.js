@@ -80,7 +80,7 @@ export class Queue extends Component {
       outputRange: [0, -110],
       extrapolate: 'clamp',
     });
-    if (!this.props.event.queue.length) {
+    if (this.props.event.queue.length === 0) {
       return (
         <View style={styles.emptyQueue}>
           <StatusBar barStyle="light-content" />

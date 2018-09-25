@@ -19,10 +19,10 @@ const resetPlaylists = () => (
   }
 );
 
-const fetchPlaylists = event => (
+const fetchPlaylists = id => (
   (dispatch) => {
     dispatch(requestPlaylists());
-    return api.playlists.find({ query: { event } }).then((response) => {
+    return api.playlists.find({ query: { event: id } }).then((response) => {
       dispatch(receivePlaylists(response.data));
       return response;
     }, (error) => {
