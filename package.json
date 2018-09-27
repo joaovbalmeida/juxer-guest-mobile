@@ -3,10 +3,52 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "start-ios": "react-native run-ios && npm run lint-watch",
+    "start-android": "react-native run-android && npm run lint-watch",
+    "lint": "esw app/**",
+    "lint-watch": "esw -w --changed app/**",
+    "test": "jest",
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
-    "react": "16.4.1",
-    "react-native": "0.56.0"
+    "@feathersjs/authentication-client": "^1.0.6",
+    "@feathersjs/commons": "^3.0.1",
+    "@feathersjs/feathers": "^3.2.3",
+    "@feathersjs/socketio-client": "^1.1.4",
+    "feathers-hooks-common": "^4.17.8",
+    "moment": "^2.22.2",
+    "prop-types": "^15.6.2",
+    "react": "16.5.2",
+    "react-native": "0.57.0",
+    "react-native-fbsdk": "^0.8.0",
+    "react-navigation": "^2.16.0",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-persist": "^5.10.0",
+    "redux-thunk": "^2.3.0",
+    "socket.io-client": "^2.1.1"
+  },
+  "devDependencies": {
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.0.0",
+    "babel-jest": "23.6.0",
+    "babel-preset-airbnb": "^2.6.0",
+    "metro-react-native-babel-preset": "0.45.0",
+    "eslint": "^5.6.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-watch": "^4.0.2",
+    "jest": "23.5.0",
+    "react-test-renderer": "16.4.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "rnpm": {
+    "assets": [
+      "./app/assets/fonts/"
+    ]
   }
 }
